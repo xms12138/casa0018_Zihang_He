@@ -9,34 +9,12 @@ This repository contains the lab materials for Connected Environments DL4Sn modu
 Our environment is increasingly being connected with small computers that are aware and responsive. This introductory, hands on module will introduce students to machine learning applied to low power embedded devices. Students will learn the main concepts of deep learning, understand how to apply deep learning to data streams from cameras and other IoT sensors, and how to deploy AI onto sensor devices, such as mobile phones and microcontrollers. Students will learn about deep learning architectures for image and time series data and will apply these ideas to sensor data in order to do forecasting, image recognition, and object tracking.  A significant component of the module will be an individual project to build and deploy an intelligent sensor application. Students will practice these ideas using Python and TensorFlow. The programme has been developed with support from the Google TensorFlow team, uses the TinyML book as a core text and utilises the Arduino Nano as the primary prototyping platform.
 
 
-## Learning Objectives
 
-On completion, students will be able to:
+### [CASA0018 Lab 4: 部署余弦波模型到 Arduino](Assessment/Projects/Other%20Project/Lab4%20cos/)
 
-Domain Knowledge
- - Understand AI / machine learning terminology
- - Understand deep learning opportunities and limitations
- - Understand different types of deep learning models
+- **训练笔记本**: [查看 sin to cos.ipynb](Assessment/Projects/Other%20Project/Lab4%20cos/sin%20to%20cos.ipynb)
+- **Arduino 源代码**: [查看 hello_casa_custom 文件夹](Assessment/Projects/Other%20Project/Lab4%20cos/hello_casa_custom/)
+- **模型文件**: [查看导出的 model.cpp 和 model.h](Assessment/Projects/Other%20Project/Lab4%20cos/models/)
 
-Prototyping Skills
- - Implement deep learning models in Python
- - Prepare data for model training
- - Select and train suitable models for different use cases (video & timeseries)
- - Embed AI on sensor devices, such as a mobile phone or a microcontroller.
-
-Collaboration
- - Document and share project information to support reproducible research
- - Present design decisions and prototypes to receive critical feedback
-
-
-## Reading List
-
-There is a course reading list under the ReadingLists@UCL facilty which can be accessed here: (https://ucl.rl.talis.com/modules/casa0018.html)
-
-
-## Assessment
-
-- Project report and associated GitHub (70% comprising project build 30% and project documentation 40%)
-- Video presentation (30%)
-
-
+#### 运行效果演示：
+![Arduino 2秒循环呼吸灯演示](Assessment/Projects/Other%20Project/Lab4%20cos/cos.gif)
