@@ -1,19 +1,10 @@
-# Final Project
+### [Projects/Final_Project](./Projects/Final_Project)
 
+This folder acts as the technical hub for the EchoLume project. It contains all the code and assets required to replicate the physical build and the machine learning pipeline:
 
-
-Hints on what should go into this page (note each three of these sections are weighted evenly):
-
-### Definition of problem being solved 
-(project overview, research question, data available, outcomes anticipated, application design) 
-
-### Documentation of experiments and results 
-(model training results, description of training runs, model architecture choices, visual record of experiments) 
-
-### Critical reflection and learning from experiments 
-(observations from experiments, factors incluencing results, potential improvements, weaknesses, feedback from reviews) 
-
-
-
-### Note: 
-*You can choose what tools you use to write up and document your project - your final submission will be a pdf document being uploaded via Moodle, however we would also expect to see a link through to your GitHub repository where you data, results etc. are documented.*
+* **`arduino/`**: The deployment firmware in C++ for the Arduino Nano 33 BLE Sense, integrating the Edge Impulse model, the PDM microphone, and the finite state machine (FSM) for the WS2812B LEDs.
+* **`edge_impulse/`**: Exported models and configuration files from the Edge Impulse platform.
+* **`experiments/`**: Documentation and data analyzing the different model architectures tested (e.g., Conv 8/16 vs. Conv 16/32 vs. Dense).
+* **`3D_Printer/`**: CAD files and assets used for the physical enclosure of the smart lamp.
+* **`scripts/`**: Python utility scripts used during the data processing and analysis phases.
+* **`report_figures/`**: All visual assets, graphs, and hardware photos used in the main report.

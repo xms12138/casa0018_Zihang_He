@@ -1,23 +1,36 @@
-# DL4SN Assessment Submission Guidelines
+# CASA0018 DL4SN Assessment Submission
 
-This folder contains an outline of the content we want you to submit for your final assessment. It should have 2 main parts:
+**Author:** Zihang He  
+**Module:** CASA0018 Deep Learning for Sensor Networks (DL4SN)
 
-- a report folder containing a report in Markdown written using the template provided
-- a projects folder showing the various projects and experiments you have built during the module
+Welcome to my final assessment repository. This folder contains all the documentation, source code, and assets for my coursework, demonstrating the process of taking machine learning out of the cloud and deploying it locally on an edge device.
 
-The assessment on this module has 3 component parts: 
-1. the physical project build (what and how the device senses, choice of approach, quality of data) 
-2. the project presentation (narrative, critical analysis and synthesis of learning, clarity of presentation)
-3. the project documentation (context, results, reflection)
+The centerpiece of this submission is my final project: **EchoLume**.
 
-This repository acts as the basis for documenting all three of those deliverables but mostly the third item in the list.
+---
 
-## Report Folder
-The template provides the structure of the information we want you to capture to describe your project. We want you to complete this report in Markdown to get into the habit of documenting your work on GitHub. 
+## 📂 Repository Structure
 
-When the report is finished you should export to PDF using an extension of your choice - for example in VSCode we use the handy MarkdownPDF extension. When the PDF has been created, upload that to Moodle for assessment.
+In accordance with the module guidelines, this assessment repository is organized into two main parts:
 
-## Projects Folder
-Your 'Final Project' is the one that you will present at the end of the module and your repository for the project should contain all code and assets used. It is important to document these resources so that other people can understand what is in your repository and replicate your project. 
+### 1. [Report](./Report)
+This folder contains the comprehensive documentation of my final project.
+* `report.md`: The final project report (approx. 1600 words) detailing the problem context, custom data collection, iterative model testing, and critical reflection.
 
-Whilst the main folder in Projects will be 'Final Project' we encourage you to add in other folders in the space to store any other experimentation you have done during the module - for example, projects from the tutorials. 
+### 2. [Projects/Final_Project](./Projects/Final_Project)
+This folder acts as the technical hub for the EchoLume project. It contains all the code and assets required to replicate the physical build and the machine learning pipeline:
+* **`arduino/`**: The deployment firmware in C++ for the Arduino Nano 33 BLE Sense, integrating the Edge Impulse model, the PDM microphone, and the finite state machine (FSM) for the WS2812B LEDs.
+* **`edge_impulse/`**: Exported models and configuration files from the Edge Impulse platform.
+* **`experiments/`**: Documentation and data analyzing the different model architectures tested (e.g., Conv 8/16 vs. Conv 16/32 vs. Dense).
+* **`3D_Printer/`**: CAD files and assets used for the physical enclosure of the smart lamp.
+* **`scripts/`**: Python utility scripts used during the data processing and analysis phases.
+* **`report_figures/`**: All visual assets, graphs, and hardware photos used in the main report.
+
+---
+
+## 💡 About the Final Project: EchoLume
+
+**EchoLume** is an offline, privacy-preserving smart lamp running an INT8-quantised keyword-spotting model entirely on an Arduino Nano 33 BLE Sense (Cortex-M4F). 
+
+It proves that everyday smart home interactions do not strictly require cloud connectivity. The system captures speech via the on-board PDM microphone, processes it through an MFCC front-end and a lightweight 1D CNN, and drives an addressable LED strip via a finite state machine. It responds reliably to four distinct commands (`turn_on`, `turn_off`, `reading`, `sleep`) while gracefully ignoring background noise and unknown utterances.
+
