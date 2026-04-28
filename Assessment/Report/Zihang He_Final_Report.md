@@ -1,6 +1,6 @@
 # EchoLume: An Offline Voice-Controlled Adaptive Smart Lamp on the Edge
 
-**Zihang He** &nbsp;·&nbsp; [GitHub](https://github.com/xms12138/casa0018_Zihang_He/tree/main/Assessment/Projects/Final_Project) &nbsp;·&nbsp; [Edge Impulse public project](https://studio.edgeimpulse.com/public/973891/latest)
+**Zihang He** &nbsp;·&nbsp; [GitHub](https://github.com/xms12138/casa0018_Zihang_He/tree/main/Assessment) &nbsp;·&nbsp; [Edge Impulse public project](https://studio.edgeimpulse.com/public/973891/latest)
 
 ## Introduction
 
@@ -8,13 +8,13 @@ Smart lamps that respond to voice are now everywhere, but the dominant pattern �
 
 EchoLume is an offline, privacy-preserving smart lamp running an INT8-quantised keyword-spotting model entirely on an Arduino Nano 33 BLE Sense (Cortex-M4F, 64 MHz). Audio never leaves the board: the on-board PDM microphone captures speech, an MFCC front-end and a 1D CNN classify it, and a finite state machine drives a WS2812B addressable LED strip. Four control words — `turn_on`, `turn_off`, `reading`, `sleep` — switch the lamp between ambient, reading and rest scenes; two distractor classes (`noise`, `unknown`) absorb non-target sounds.
 
-The implementation builds on Warden's *Speech Commands* dataset (Warden, 2018) and the *Hello Edge* line of micro-controller keyword spotting (Zhang et al., 2017), with Edge Impulse as the training-and-export harness. The contribution this report documents is not a novel architecture but a structured exploration of the design space — what stays in budget, what improves the failure mode, and what does not.
+The implementation builds on Warden's _Speech Commands_ dataset (Warden, 2018) and the _Hello Edge_ line of micro-controller keyword spotting (Zhang et al., 2017), with Edge Impulse as the training-and-export harness. The contribution this report documents is not a novel architecture but a structured exploration of the design space — what stays in budget, what improves the failure mode, and what does not.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/xms12138/casa0018_Zihang_He/main/Assessment/Projects/Final_Project/report_figures/05_hardware/light.jpg" width="380">
+  <img src="https://raw.githubusercontent.com/xms12138/casa0018_Zihang_He/main/Assessment/Projects/Final_Project/report_figures/05_hardware/front.jpg" width="330">
 </p>
 
-*Figure 1. EchoLume in the READING state on a desk.*
+_Figure 1. EchoLume on a desk._
 
 ## Research Question
 
@@ -32,13 +32,13 @@ This separation matters: the FSM lets the system fail gracefully. If the classif
   <img src="https://raw.githubusercontent.com/xms12138/casa0018_Zihang_He/main/Assessment/Projects/Final_Project/report_figures/02_methods/system_overview.png" width="720">
 </p>
 
-*Figure 2. EchoLume signal-path overview.*
+_Figure 2. EchoLume signal-path overview._
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/xms12138/casa0018_Zihang_He/main/Assessment/Projects/Final_Project/report_figures/02_methods/state_machine.png" width="460">
 </p>
 
-*Figure 3. Lamp state machine (threshold 0.60, 1 s state lock). `noise`, `unknown` and sub-threshold predictions are ignored.*
+_Figure 3. Lamp state machine (threshold 0.60, 1 s state lock). `noise`, `unknown` and sub-threshold predictions are ignored._
 
 ## Data
 
@@ -46,13 +46,13 @@ The dataset comprises 1,025 one-second utterances across six classes (Figure 4).
 
 Two distractor classes back the action vocabulary against a noisy environment. `noise` (175 samples) is drawn from the MS-SNSD noisy-speech dataset (Reddy et al., 2019) via Edge Impulse's public datasets. `unknown` (250 samples) is a balanced subset of Google Speech Commands V2 (Warden, 2018) with the four target words filtered out. The 80/20 train/test split is applied uniformly; Edge Impulse subdivides 20 % of training for validation during model fitting.
 
-The action classes are balanced and the distractor classes deliberately oversampled, on the heuristic that a keyword spotter's ability to *not* fire matters as much as its ability to fire. The single largest known limitation is that all 600 action samples come from one primary speaker — a generalisation risk addressed in *Results*.
+The action classes are balanced and the distractor classes deliberately oversampled, on the heuristic that a keyword spotter's ability to _not_ fire matters as much as its ability to fire. The single largest known limitation is that all 600 action samples come from one primary speaker — a generalisation risk addressed in _Results_.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/xms12138/casa0018_Zihang_He/main/Assessment/Projects/Final_Project/report_figures/01_data/class_distribution.png" width="620">
 </p>
 
-*Figure 4. Dataset class distribution (n = 1,025).*
+_Figure 4. Dataset class distribution (n = 1,025)._
 
 ## Model
 
@@ -66,7 +66,7 @@ Training used 200 epochs, learning rate 0.005, batch 32, with the Edge Impulse a
   <img src="https://raw.githubusercontent.com/xms12138/casa0018_Zihang_He/main/Assessment/Projects/Final_Project/report_figures/02_methods/model_architecture.png" width="380">
 </p>
 
-*Figure 5. Baseline 1D CNN architecture.*
+_Figure 5. Baseline 1D CNN architecture._
 
 ## Experiments
 
@@ -78,24 +78,24 @@ Three architectures were compared on the same DSP, augmentation and training sch
 
 **exp_dense (no Conv).** Replacing both Conv1D blocks with a single Dense 32 head tested whether MFCC features alone make the convolutions redundant. They do not: test accuracy collapses to 61.95 % (−20 pp), `noise` to 40 %, `turn_on` to 43 %. The dense head memorises validation patterns (its `turn_on` validation recall is 90 %) but does not generalise. Convolutions do real work even at this scale, and the experiment locks Conv1D in as load-bearing for the rest of the design.
 
-| Metric | baseline | exp_wider | exp_dense |
-|---|---|---|---|
-| Val acc (INT8) | 94.5 % | **96.3 %** | 75.0 % |
-| Test acc @ 0.6 (INT8) | 81.95 % | **82.93 %** | 61.95 % |
-| `turn_on` F1 | 0.69 | 0.76 | 0.55 |
-| `turn_on → turn_off` | 10 % | **33 %** | 23 % |
-| Inference (ms) | 4 | 7 | 1 |
-| Peak RAM (KB) | 12.5 | 14.0 | 1.8 |
-| Flash (KB) | 46.4 | 49.4 | 34.1 |
-| Verdict | shipped | unsafe failure mode | confirms Conv is load-bearing |
+| Metric                | baseline | exp_wider           | exp_dense                     |
+| --------------------- | -------- | ------------------- | ----------------------------- |
+| Val acc (INT8)        | 94.5 %   | **96.3 %**          | 75.0 %                        |
+| Test acc @ 0.6 (INT8) | 81.95 %  | **82.93 %**         | 61.95 %                       |
+| `turn_on` F1          | 0.69     | 0.76                | 0.55                          |
+| `turn_on → turn_off`  | 10 %     | **33 %**            | 23 %                          |
+| Inference (ms)        | 4        | 7                   | 1                             |
+| Peak RAM (KB)         | 12.5     | 14.0                | 1.8                           |
+| Flash (KB)            | 46.4     | 49.4                | 34.1                          |
+| Verdict               | shipped  | unsafe failure mode | confirms Conv is load-bearing |
 
-*Table 1. Cross-experiment summary (INT8 unless noted).*
+_Table 1. Cross-experiment summary (INT8 unless noted)._
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/xms12138/casa0018_Zihang_He/main/Assessment/Projects/Final_Project/report_figures/03_experiments/baseline/model_test_int8.png" width="660">
 </p>
 
-*Figure 6. Baseline INT8 test-set confusion matrix (threshold 0.6).*
+_Figure 6. Baseline INT8 test-set confusion matrix (threshold 0.6)._
 
 ## Results and Observations
 
@@ -109,13 +109,13 @@ Two findings stood out. First, live recall exceeded EI test-set recall on every 
   <img src="https://raw.githubusercontent.com/xms12138/casa0018_Zihang_He/main/Assessment/Projects/Final_Project/report_figures/04_testing/live_test_per_keyword.png" width="660">
 </p>
 
-*Figure 7. Live-testing results per keyword (n = 25 each).*
+_Figure 7. Live-testing results per keyword (n = 25 each)._
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/xms12138/casa0018_Zihang_He/main/Assessment/Projects/Final_Project/report_figures/04_testing/live_test_vs_ei.png" width="660">
 </p>
 
-*Figure 8. Live test versus Edge Impulse test-set recall, per keyword.*
+_Figure 8. Live test versus Edge Impulse test-set recall, per keyword._
 
 **Limitations.** Three structural weaknesses are visible in the data above. (1) `turn_on` and `turn_off` share their leading 800 ms, leaving the model dependent on the trailing fricative — the worst class in every experiment. (2) The −12.55 pp val→test gap reflects a real distribution shift, almost certainly tied to (3) the dataset being recorded by a single primary speaker. Two further issues warrant brief mention: the 296 ms DSP cost still exceeds the 100 ms real-time budget but does not break functionality, since inference itself is only 4 ms; and the confidence threshold trades coverage for safety — 0.5 raises recall but lifts wrong-state errors, while 0.6 is the conservative pick. The bystander false-trigger mode points to a missing capability: without a wake-word gate or voice-activity threshold, sub-threshold utterances from the environment can still nudge state.
 
@@ -123,17 +123,17 @@ Two findings stood out. First, live recall exceeded EI test-set recall on every 
 
 ## Bibliography
 
-1. Reddy, C. K. A., Beyrami, E., Pool, J., Cutler, R., Srinivasan, S., & Gehrke, J. (2019). *A Scalable Noisy Speech Dataset and Online Subjective Test Framework.* Interspeech 2019. https://arxiv.org/abs/1909.08050
-2. Warden, P. (2018). *Speech Commands: A Dataset for Limited-Vocabulary Speech Recognition.* arXiv:1804.03209. https://arxiv.org/abs/1804.03209
-3. Zhang, Y., Suda, N., Lai, L., & Chandra, V. (2017). *Hello Edge: Keyword Spotting on Microcontrollers.* arXiv:1711.07128. https://arxiv.org/abs/1711.07128
+1. Reddy, C. K. A., Beyrami, E., Pool, J., Cutler, R., Srinivasan, S., & Gehrke, J. (2019). _A Scalable Noisy Speech Dataset and Online Subjective Test Framework._ Interspeech 2019. https://arxiv.org/abs/1909.08050
+2. Warden, P. (2018). _Speech Commands: A Dataset for Limited-Vocabulary Speech Recognition._ arXiv:1804.03209. https://arxiv.org/abs/1804.03209
+3. Zhang, Y., Suda, N., Lai, L., & Chandra, V. (2017). _Hello Edge: Keyword Spotting on Microcontrollers._ arXiv:1711.07128. https://arxiv.org/abs/1711.07128
 
-----
+---
 
 ## Declaration of Authorship
 
 I, Zihang He, confirm that the work presented in this assessment is my own. Where information has been derived from other sources, I confirm that this has been indicated in the work.
 
-*Zihang He*
+_Zihang He_
 
 2026-04-28
 
