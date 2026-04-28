@@ -83,7 +83,9 @@
 
 ---
 
-## 8. 报告（`report/report.md`，1500 字 ±20%）
+## 8. 报告（`../../Report/report.md`，1500 字 ±20%）
+
+> 报告按课程要求放在 `Assessment/Report/`，与 `Assessment/Projects/` 同级。`Report/` 下当前文件：`README.md`（课程模板原貌，**不动**）、`report.md`（正在写的版本）、`outline.md`、`references.bib`、`ProjectIdea.md`。
 
 按 9 个章节推进，建议顺序：
 
@@ -92,7 +94,7 @@
 - [ ] **Results and Observations** — 含 critical reflection 的 5 条（已在 CLAUDE.md §7）
 - [ ] **Introduction** — 末写，避免反复改
 - [ ] **Research Question** — 1–2 句
-- [ ] **Bibliography** — 同步填 `report/references.bib`（核心引用：Warden 2018 / Reddy 2019 / Zhang 2017）
+- [ ] **Bibliography** — 同步填 `../../Report/references.bib`（核心引用：Warden 2018 / Reddy 2019 / Zhang 2017）
 - [ ] **Declaration of Authorship** — 签名 + 日期
 - [ ] 字数核查 + 导出 PDF（VSCode Markdown PDF 扩展）
 
