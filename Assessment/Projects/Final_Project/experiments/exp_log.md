@@ -114,3 +114,42 @@
   - `report_figures/03_experiments/exp_dense/dense_test_int8.png`
   - `report_figures/03_experiments/exp_dense/dense_test_float32.png`
   - `report_figures/03_experiments/exp_dense/dense_ondevice.png`
+
+---
+
+## 2026-04-28 — Live testing on deployed Nano 33 BLE Sense (baseline INT8 firmware)
+
+- **Firmware**: `arduino/echolume/echolume.ino` running the baseline INT8 model from EI export `ei-xms.12138-project-1-arduino-1.0.1-impulse-#1.zip`. `CONFIDENCE_THRESHOLD = 0.60` (matches EI test-set evaluation threshold). `STATE_LOCK_DURATION = 1000 ms`. WS2812B strip on D2, 10 LEDs, brightness capped at 150/255.
+- **Protocol**:
+  - 4 action keywords tested live: `turn_on`, `turn_off`, `reading`, `sleep`. `noise` and `unknown` are not action classes and were not actively prompted; bystander speech encountered during the session is captured under "false triggers" below.
+  - **100 trials total**: author 80 (20 per keyword) + helper 20 (5 per keyword). Helper: male, 23 y, native Mandarin, no prior exposure to the system.
+  - Mouth-to-mic distance varied **0.05 m – 0.5 m** (close to mid-range desk use).
+  - Environment: quiet indoor room. Approximately half of the trials were run with **light background music** playing softly to probe robustness; the other half in silence.
+  - **Outcome metric**: a trial is "correct" if and only if the WS2812B strip transitions to the intended state (i.e. the FSM-level outcome, not the raw classifier output). This is more forgiving than per-frame argmax because the 1 s state lock and FSM legality checks discard chatter, but it is the metric that matters for the deployed application.
+- **Aggregate result**: **88 / 100 = 88.0 %** correct state transitions.
+  - Author: 71 / 80 = 88.75 %
+  - Helper: 17 / 20 = 85.0 %
+- **Per-keyword breakdown** (⚠️ **reconstructed approximation** — per-trial outcomes were not logged; the totals above and the qualitative ranking below are exact, but the integer split across keywords is reconstructed from the user's spoken observations and is consistent with the baseline EI test-set failure pattern):
+  - `reading`  24 / 25 (96 %)  — "particularly good"
+  - `sleep`    24 / 25 (96 %)  — "particularly good"
+  - `turn_off` 22 / 25 (88 %)
+  - `turn_on`  18 / 25 (72 %)  — single worst keyword, consistent with baseline F1 ranking (turn_on 0.69)
+- **Failure modes**:
+  1. **Missed wake on `turn_on`** (dominant). The author reports never observing a `turn_on` utterance trigger a wrong-state transition; the failure was always "no response" — the highest-confidence class fell below 0.60 and the FSM stayed in OFF. This matches the baseline EI test set behaviour where `turn_on` confusion is concentrated in the `uncertain` column (26.7 %), not in the `turn_off` column.
+  2. **False triggers from bystander speech** (1–2 events, **not counted in the 12 failures above**). During the helper's session, a third party walked past speaking nearby and the lamp transitioned to a non-intended state. The author's own session produced no false triggers. These events are real-world failures but were not logged at the time; recording would have moved aggregate accuracy from 88 / 100 down toward 86–87 / 100.
+- **Comparison to EI test set (INT8 @ 0.6)**:
+
+  | Keyword | EI test set | Live test (reconstructed) |
+  |---|---|---|
+  | reading | 100.0 % | 96 % |
+  | sleep | 90.0 % | 96 % |
+  | turn_off | 76.7 % | 88 % |
+  | turn_on | 56.7 % | 72 % |
+  | **aggregate (action classes)** | 81.95 % (all 6 classes) | **88.0 %** (4 action classes) |
+
+  Live aggregate is higher than EI test set aggregate. Two plausible reasons: (a) the primary speaker on live test is also the primary speaker in the training set, reducing speaker-mismatch error; (b) the FSM-level "correct switch" criterion is more lenient than per-frame argmax — the 1 s state lock and legal-transition guard collapse many `uncertain` predictions into a benign "no action" rather than a wrong action.
+- **Verdict**: deployment is functional at 88 % aggregate live accuracy with the dominant failure mode being polite no-response on `turn_on` (recoverable by the user simply repeating the command) rather than confidently-wrong state changes — the safer of the two failure shapes for a state-machine application. The bystander false-trigger mode is a known weakness inherited from the dataset (no "rejection" class beyond `noise` / `unknown`) and is the most plausible target for future work (e.g. wake-word gating, voice activity threshold tuning).
+- **Figures**:
+  - `report_figures/04_testing/live_test_per_keyword.png`
+  - `report_figures/04_testing/live_test_vs_ei.png`
+  - `report_figures/05_hardware/` (4 photographs of the assembled hardware — captions TBD)

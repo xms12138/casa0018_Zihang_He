@@ -1,1 +1,27 @@
-{}
+{
+  "type": "MFCC",
+  "implementation_version": 4,
+  "parameters": {
+    "num_cepstral": 13,
+    "frame_length": 0.025,
+    "frame_stride": 0.02,
+    "num_filters": 32,
+    "fft_length": 256,
+    "low_frequency": 80,
+    "high_frequency": 0,
+    "win_size": 101,
+    "pre_cof": 0.98,
+    "pre_shift": 1
+  },
+  "input": {
+    "axes": ["audio"],
+    "sampling_frequency_hz": 16000,
+    "window_size_ms": 1000,
+    "window_increase_ms": 500
+  },
+  "output": {
+    "feature_count": 637,
+    "reshape_columns": 13
+  },
+  "notes": "FFT length manually reduced from autotune-recommended 512 to 256 to bring DSP time from 416 ms to 296 ms. See experiments/exp_log.md entry 2026-04-27."
+}
